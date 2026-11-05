@@ -1,0 +1,11 @@
+# Local values for `pnpm dev`. Copy to .dev.vars, which git ignores.
+
+# The API the Worker calls. Without this it uses http://localhost:3000.
+API_ENDPOINT=https://api.companyenrich.com
+
+# OAuth application in your Clerk development instance. Only the OAuth sign-in
+# flow uses these: requests that send a CompanyEnrich API key as a bearer token
+# work without them.
+OAUTH_CLIENT_ID=
+OAUTH_CLIENT_SECRET=
+OAUTH_CLERK=https://your-instance.clerk.accounts.dev

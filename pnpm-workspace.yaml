@@ -1,0 +1,9 @@
+allowBuilds:
+  '@mongodb-js/zstd': false
+  bufferutil: false
+  core-js-pure: false
+  esbuild: true
+  node-liblzma: false
+  sharp: false
+  utf-8-validate: false
+  workerd: true

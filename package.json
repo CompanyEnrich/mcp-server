@@ -1,0 +1,51 @@
+{
+  "name": "companyenrich-mcp",
+  "version": "2.0.0",
+  "description": "MCP server for the CompanyEnrich API: company and people enrichment, search, and lookup.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "companyenrich",
+    "company-data",
+    "enrichment",
+    "people-search"
+  ],
+  "homepage": "https://github.com/CompanyEnrich/mcp-server#readme",
+  "bugs": "https://github.com/CompanyEnrich/mcp-server/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CompanyEnrich/mcp-server.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "companyenrich-mcp": "dist/stdio.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "esbuild src/stdio.ts --bundle --platform=node --target=node20 --format=esm --packages=external --outfile=dist/stdio.js",
+    "prepack": "npm run build",
+    "deploy": "wrangler deploy -e production",
+    "dev": "wrangler dev -e dev",
+    "cf-typegen": "wrangler types --strict-vars=false",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-oauth-provider": "^0.10.4",
+    "@types/node": "^26.6.3",
+    "agents": "^0.24.0",
+    "esbuild": "^0.28.2",
+    "hono": "^4.13.9",
+    "typescript": "7.0.2",
+    "wrangler": "^4.141.0"
+  }
+}

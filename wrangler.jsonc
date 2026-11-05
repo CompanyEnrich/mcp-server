@@ -1,0 +1,45 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    // Secrets never belong in this file: `vars` are stored in plain text.
+    // The Cloudflare account comes from `wrangler login` or CLOUDFLARE_ACCOUNT_ID.
+    "name": "companyenrich-mcp-stateless",
+    "main": "src/index.ts",
+    "compatibility_date": "2025-03-10",
+    "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+    "env": {
+        "dev": {
+            "vars": {
+                "API_ENDPOINT": "http://localhost:3000",
+            },
+            // Read from .dev.vars, see .dev.vars.example.
+            "secrets": {
+                "required": ["OAUTH_CLIENT_ID", "OAUTH_CLIENT_SECRET", "OAUTH_CLERK"],
+            },
+            "kv_namespaces": [
+                {
+                    "binding": "OAUTH_KV",
+                    "id": "<Add-KV-ID>",
+                },
+            ],
+        },
+        "production": {
+            "vars": {
+                "OAUTH_CLERK": "https://clerk.companyenrich.com",
+                "API_ENDPOINT": "https://api.companyenrich.com",
+            },
+            // Stored as Worker secrets, see "Deploying" in README.md.
+            "secrets": {
+                "required": ["OAUTH_CLIENT_ID", "OAUTH_CLIENT_SECRET"],
+            },
+            "kv_namespaces": [
+                {
+                    "binding": "OAUTH_KV",
+                    "id": "0af369f10c5249e2bb4fb4280b2b7b13",
+                },
+            ],
+        },
+    },
+    "observability": {
+        "enabled": true,
+    },
+}
