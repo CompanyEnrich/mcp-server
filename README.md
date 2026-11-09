@@ -422,28 +422,22 @@ stable version is published with the `latest` tag. If that version already
 exists, the build succeeds and publishing is skipped. Older versions and
 prereleases cannot replace `latest` through this workflow.
 
-Configure npm trusted publishing once before the first automated release:
+Configure the publishing token once before the first automated release:
 
-1. Commit and push the workflow and package changes to `main`. With the
-   already-published version `2.0.0`, this first run builds and skips publishing.
-2. Sign in to npm as an owner of `@companyenrich/mcp` and enable account 2FA
-   if it is not already enabled.
-3. Open the package's **Settings → Trusted publishing** and add **GitHub Actions**.
-4. Enter these values exactly:
+1. Create a granular npm access token with **read and write** access to
+   `@companyenrich/mcp` and **Bypass 2FA** enabled.
+2. In the GitHub repository, open **Settings → Secrets and variables → Actions**
+   and add a repository secret named **`NPM_TOKEN`** containing the token.
+3. Commit and push the workflow and package changes to `main`. With the
+   already-published version `2.0.0`, this first run builds, checks npm
+   authentication, and skips publishing.
 
-   | Field | Value |
-   | --- | --- |
-   | Organization or user | `CompanyEnrich` |
-   | Repository | `mcp-server` |
-   | Workflow filename | `publish.yml` |
-   | Environment name | Leave blank |
-   | Allowed actions | Enable direct publishing with `npm publish` |
-
-5. Save the trusted publisher before pushing a new package version.
-
-No `NPM_TOKEN` or `NODE_AUTH_TOKEN` GitHub secret is needed. npm authenticates
-the workflow using GitHub's short-lived OIDC identity. The repository is
-private, so this workflow does not force a public provenance statement.
+GitHub stores the token as an encrypted secret. The workflow exposes it as
+`NODE_AUTH_TOKEN` only for the authentication check and publishing step. Never
+commit the token to the repository. Replace the `NPM_TOKEN` secret when rotating
+the token or before it expires. No npm trusted-publisher connection is needed.
+The repository is private, so this workflow does not force a public provenance
+statement.
 
 For each release, bump the version before committing your changes:
 
@@ -458,8 +452,8 @@ patch after `2.0.0` is `2.0.1`. Pushing code without a new version still checks
 the build but does not create an npm release. You can retry a failed release
 from **GitHub → Actions → Publish to npm → Run workflow**, selecting `main`.
 
-See npm's [trusted publishing guide](https://docs.npmjs.com/trusted-publishers/)
-for account and configuration requirements.
+See npm's [CI/CD token guide](https://docs.npmjs.com/using-private-packages-in-a-ci-cd-workflow/)
+for token configuration details.
 
 ### Manual publishing
 
