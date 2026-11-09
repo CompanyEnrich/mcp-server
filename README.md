@@ -52,14 +52,14 @@ Claude Code:
 
 ```bash
 claude mcp add companyenrich --transport stdio \
-  --env COMPANYENRICH_API_KEY=your-api-key -- npx -y companyenrich-mcp
+  --env COMPANYENRICH_API_KEY=your-api-key -- npx -y @companyenrich/mcp
 ```
 
 Codex CLI:
 
 ```bash
 codex mcp add companyenrich --env COMPANYENRICH_API_KEY=your-api-key \
-  -- npx -y companyenrich-mcp
+  -- npx -y @companyenrich/mcp
 ```
 
 Claude Desktop, Cursor, and other clients with a JSON config:
@@ -69,7 +69,7 @@ Claude Desktop, Cursor, and other clients with a JSON config:
   "mcpServers": {
     "companyenrich": {
       "command": "npx",
-      "args": ["-y", "companyenrich-mcp"],
+      "args": ["-y", "@companyenrich/mcp"],
       "env": {
         "COMPANYENRICH_API_KEY": "your-api-key"
       }
@@ -408,6 +408,86 @@ pnpm dev
 | `src/clerk-handler.ts` | OAuth sign-in through Clerk                              |
 
 Run `pnpm cf-typegen` after changing `wrangler.jsonc`.
+
+## Publishing to npm
+
+The local stdio server is published as `@companyenrich/mcp`.
+
+### Automatic publishing from GitHub
+
+The workflow in [`.github/workflows/publish.yml`](.github/workflows/publish.yml)
+runs on every push to `main`. It installs dependencies from the lockfile,
+type-checks, builds, and checks npm for the version in `package.json`. A new
+stable version is published with the `latest` tag. If that version already
+exists, the build succeeds and publishing is skipped. Older versions and
+prereleases cannot replace `latest` through this workflow.
+
+Configure npm trusted publishing once before the first automated release:
+
+1. Commit and push the workflow and package changes to `main`. With the
+   already-published version `2.0.0`, this first run builds and skips publishing.
+2. Sign in to npm as an owner of `@companyenrich/mcp` and enable account 2FA
+   if it is not already enabled.
+3. Open the package's **Settings → Trusted publishing** and add **GitHub Actions**.
+4. Enter these values exactly:
+
+   | Field | Value |
+   | --- | --- |
+   | Organization or user | `CompanyEnrich` |
+   | Repository | `mcp-server` |
+   | Workflow filename | `publish.yml` |
+   | Environment name | Leave blank |
+   | Allowed actions | Enable direct publishing with `npm publish` |
+
+5. Save the trusted publisher before pushing a new package version.
+
+No `NPM_TOKEN` or `NODE_AUTH_TOKEN` GitHub secret is needed. npm authenticates
+the workflow using GitHub's short-lived OIDC identity. The repository is
+private, so this workflow does not force a public provenance statement.
+
+For each release, bump the version before committing your changes:
+
+```bash
+npm version patch --no-git-tag-version
+# Commit your code changes and package.json, then:
+git push origin main
+```
+
+Use `minor` or `major` instead of `patch` when appropriate. For example, the next
+patch after `2.0.0` is `2.0.1`. Pushing code without a new version still checks
+the build but does not create an npm release. You can retry a failed release
+from **GitHub → Actions → Publish to npm → Run workflow**, selecting `main`.
+
+See npm's [trusted publishing guide](https://docs.npmjs.com/trusted-publishers/)
+for account and configuration requirements.
+
+### Manual publishing
+
+Your npm account must have permission to publish under the `companyenrich`
+scope. Enable two-factor authentication for interactive publishing.
+
+From the repository root:
+
+```bash
+pnpm install --frozen-lockfile
+npm run type-check
+npm pack --dry-run
+npm login --registry=https://registry.npmjs.org/
+npm whoami --registry=https://registry.npmjs.org/
+npm publish --access public
+```
+
+`npm pack --dry-run` builds the server and lists the package contents without
+publishing. Check that the package contains `dist/stdio.js`, `package.json`,
+`README.md`, and `LICENSE`. Publishing runs the type check and builds the server
+automatically. The package defaults to public access on the npm registry.
+
+For subsequent releases, update the version first. Each release needs a
+version that has not already been published. Choose either the GitHub workflow
+or manual publishing for a release.
+
+See npm's [scoped package publishing guide](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/)
+for account and authentication requirements.
 
 ## Deploying
 

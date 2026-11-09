@@ -1,5 +1,5 @@
 {
-  "name": "companyenrich-mcp",
+  "name": "@companyenrich/mcp",
   "version": "2.0.0",
   "description": "MCP server for the CompanyEnrich API: company and people enrichment, search, and lookup.",
   "keywords": [
@@ -24,12 +24,17 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "engines": {
     "node": ">=20"
   },
   "scripts": {
     "build": "esbuild src/stdio.ts --bundle --platform=node --target=node20 --format=esm --packages=external --outfile=dist/stdio.js",
     "prepack": "npm run build",
+    "prepublishOnly": "npm run type-check",
     "deploy": "wrangler deploy -e production",
     "dev": "wrangler dev -e dev",
     "cf-typegen": "wrangler types --strict-vars=false",
