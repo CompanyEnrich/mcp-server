@@ -55,8 +55,9 @@ Call `get_current_user`. It is free and returns the account and credit balance.
 
 ## Costs
 
-Every tool except `get_current_user` spends credits from the user's
-CompanyEnrich account. Search tools charge per result returned.
+`get_current_user`, `count_companies` and `count_people` are free. Every other
+tool spends credits from the user's CompanyEnrich account. Search tools charge
+per result returned.
 
 - Do not call a paid tool to test the setup. Use `get_current_user`.
 - Ask the user before the first paid call, and say how many results you intend
