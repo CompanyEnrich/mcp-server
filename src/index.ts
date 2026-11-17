@@ -4,6 +4,14 @@ import { ClerkHandler } from "./clerk-handler";
 
 const mcpHandler = makeHandler();
 
+/**
+ * The provider's own access tokens have the form `userId:grantId:secret`.
+ * Anything else that is not blank may be an API key.
+ */
+function isApiKeyCandidate(token: string) {
+    return token.trim() !== "" && token.split(":").length !== 3;
+}
+
 const oauth = new OAuthProvider({
     apiRoute: "/mcp",
     apiHandler: { fetch: mcpHandler },
@@ -15,9 +23,13 @@ const oauth = new OAuthProvider({
     // clients that cannot use Client ID Metadata Documents yet.
     clientRegistrationEndpoint: "/register",
     defaultHandler: ClerkHandler as any,
-    resolveExternalToken: async ({ token }) => ({
-        props: { accessToken: token },
-    }),
+    // A bearer token the provider does not know is treated as a CompanyEnrich
+    // API key and passed through. The provider only gets here after its own
+    // lookup missed, so a token in its own format is an expired or revoked
+    // OAuth token: rejecting it produces the 401 that tells the client to
+    // refresh or sign in again.
+    resolveExternalToken: async ({ token }) =>
+        isApiKeyCandidate(token) ? { props: { accessToken: token } } : null,
     tokenEndpoint: "/token",
 });
 

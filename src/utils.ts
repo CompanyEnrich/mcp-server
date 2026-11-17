@@ -148,15 +148,15 @@ async function handleHttpError(
 	const bodyMessage = await readErrorMessage(response);
 	const statusMessage = getStatusMessage(response.status);
 	const message = bodyMessage
-		? `${statusMessage}: ${bodyMessage}`
+		? `${statusMessage} (${bodyMessage})`
 		: statusMessage;
 
 	return toolError(message);
 }
 
 function getStatusMessage(status: number) {
-	if (status === 400) {
-		return "Invalid request";
+	if (status === 400 || status === 422) {
+		return "Invalid request.";
 	}
 	if (status === 401) {
 		return "Authentication failed. Please check your API key.";
@@ -165,15 +165,15 @@ function getStatusMessage(status: number) {
 		return "Insufficient credits. Please check your account balance.";
 	}
 	if (status === 403) {
-		return "Forbidden. Your API key does not have access to this endpoint.";
+		return "Forbidden. Your plan or API key does not have access to this feature.";
 	}
 	if (status === 404) {
-		return "Resource not found in the database.";
+		return "Not found.";
 	}
 	if (status === 429) {
 		return "Rate limit exceeded. Please try again later.";
 	}
-	return `Error ${status}`;
+	return `Error ${status}.`;
 }
 
 async function readErrorMessage(response: Response) {
@@ -195,16 +195,8 @@ function extractProblemMessage(value: unknown): string | undefined {
 		return undefined;
 	}
 
-	const detail = readString(value.detail);
-	if (detail) {
-		return detail;
-	}
-
-	const title = readString(value.title);
-	if (title) {
-		return title;
-	}
-
+	// Field errors come first: a validation problem also carries a generic
+	// title, and only the field errors say which input was wrong.
 	const errors = value.errors;
 	if (isRecord(errors)) {
 		const messages = Object.entries(errors).flatMap(([field, fieldErrors]) => {
@@ -219,7 +211,7 @@ function extractProblemMessage(value: unknown): string | undefined {
 		}
 	}
 
-	return undefined;
+	return readString(value.detail) ?? readString(value.title);
 }
 
 async function readJson(response: Response) {
