@@ -1,5 +1,7 @@
 # CompanyEnrich MCP Server
 
+[![npm version](https://img.shields.io/npm/v/@companyenrich/mcp)](https://www.npmjs.com/package/@companyenrich/mcp)
+
 A [Model Context Protocol](https://modelcontextprotocol.io) server for the
 [CompanyEnrich](https://companyenrich.com) API. It lets MCP clients such as
 Claude, Codex, Cursor, and VS Code enrich companies, search companies and
